@@ -3,7 +3,7 @@ import { FARM_API } from '$env/static/private';
 import type { SignIn, User } from '$lib/index';
 
 export const actions = {
-	login: async ({ request, fetch }) => {
+	login: async ({ request, fetch, cookies }) => {
 		const data = await request.formData();
 		const username = data.get('username') as string;
 		const password = data.get('password') as string;
@@ -42,15 +42,23 @@ export const actions = {
 			return fail(400, { messageValidation: messagesError[response.status] });
 		}
 
-		const user = (await response.json()) as User;
+		const user: User = { id: 100, name: "Emanuel", username: "echavira", status: 1 };
 
-		localStorage.setItem('username', user.username);
+		const date = new Date();
+		date.setTime(date.getTime() + (1*24*60*60*1000));
+
+		cookies.set('session', user.username, {
+			path: '/',
+			httpOnly: true,
+			sameSite: "strict",
+			expires: date
+		});
 
 		throw redirect(303, '/');
 	},
 	logout: async ({ locals }) => {
-		localStorage.removeItem('username');
-		if (!locals.user) return;
-		locals.user = null;
+	
+		if (!locals.session) return;
+		locals.session = null;
 	}
 } satisfies Actions;

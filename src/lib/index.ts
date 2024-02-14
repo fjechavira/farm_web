@@ -1,5 +1,4 @@
-// place files you want to import through the `$lib` alias in this folder.
-
+// Models and Types
 export * from './models/permission';
 export * from './models/session';
 export * from './models/user';
