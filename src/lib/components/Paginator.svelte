@@ -77,7 +77,7 @@
 </script>
 
 <!-- Paginator -->
-<nav class="flex items-center justify-between bg-white mt-2" aria-label="Pagination">
+<nav class="flex items-center justify-between mt-2" aria-label="Pagination">
 	<div class="hidden sm:block">
 		<p class="text-sm text-gray-700">
 			Mostrando

@@ -2,6 +2,7 @@
 	  import type { User } from "$lib";
 	  import AddUser from "$lib/components/AddUser.svelte";
 	  import DetailUser from "$lib/components/DetailUser.svelte";
+	import MessageContent from "$lib/components/MessageContent.svelte";
 	  import Paginator from "$lib/components/Paginator.svelte";
     import type { PageData } from "./$types";
 
@@ -43,7 +44,7 @@
     }
 
     async function getUsers() {
-      params.limit = 2;
+      params.limit = 5;
       params.offset = 1;
       const dataParams = new URLSearchParams(params);
       const uri = `${data.urlApi}/user?${dataParams.toString()}`;
@@ -63,6 +64,7 @@
             500: "Ocurrio un error en el servidor que impidió procesar la solicitud, intentarlo nuevamente, si el error persiste reportar con el Administrador",
         };
         alert(messagesError[response.status]);
+        return;
       }
 
       const users = (await response.json()) as User[];
@@ -70,7 +72,7 @@
 
       data.records = users[0].records;
       data.users = users;   
-      data.pages = totalPages; 
+      data.pages = totalPages;
     }
 
     async function getUserById(id: number) {
@@ -162,7 +164,7 @@
                         <td class="py-2 pl-3 pr-4 text-right text-sm font-medium sm:pr-0">
                             <!-- <a href="#" class="text-indigo-600 hover:text-indigo-900">Edit<span class="sr-only">, Lindsay Walton</span></a> -->
                             <button type="button" on:click={() => deleteUserById(usr.idUsuario)} class="rounded bg-red-600 px-2 py-1 text-xs font-semibold text-white shadow-sm hover:bg-red-700">Eliminar</button>
-                            <button type="button" on:click={() => getUserById(usr.idUsuario)} class="rounded bg-gray-600 px-2 py-1 text-xs font-semibold text-white shadow-sm hover:bg-gray-700">Detalle</button>
+                            <button type="button" on:click={() => getUserById(usr.idUsuario)} class="rounded bg-gray-600 px-2 py-1 text-xs font-semibold text-white shadow-sm hover:bg-gray-700">Modificar</button>
                         </td>
                     </tr>
                 {/each}
@@ -178,9 +180,12 @@
         />
     </div>
 {:else}
-    <div>{data.messageError}</div>
+    <MessageContent 
+      title={"Listado de Usuarios"}
+      message={data.messageError}
+      typeMessage={data.messageError.length ? "error" : "info" }
+    />
 {/if} 
-
 
 
 <AddUser 

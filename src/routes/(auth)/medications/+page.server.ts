@@ -1,7 +1,7 @@
 import { redirect } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
 import { FARM_API } from "$env/static/private";
-import type { Params, User } from "$lib/index";
+import type { Params, Medication, PharmaceuticalForm } from "$lib/index";
 
 
 export const load = (async ({ locals, fetch, url: { pathname, searchParams } }) => {
@@ -16,10 +16,10 @@ export const load = (async ({ locals, fetch, url: { pathname, searchParams } }) 
         limit: +(limit),
         offset: +(offset),
     };
+    let pharmaceuticalForm: PharmaceuticalForm[] = [];
 
     const dataParams = new URLSearchParams(params);
-    // console.log(`Valor de DataParams en User ${dataParams}`);
-    const uri = `${FARM_API}/user?${dataParams.toString()}`;
+    const uri = `${FARM_API}/medication?${dataParams.toString()}`;
 
     const response = await fetch(uri, {
         method: "GET",
@@ -37,7 +37,8 @@ export const load = (async ({ locals, fetch, url: { pathname, searchParams } }) 
 
     if (response.status !== 200) {
         return {
-            users: null,
+            medications: null,
+            pharmaceuticalForm,
             records: null,
             messageError: messagesError[response.status],
             params: params,
@@ -47,12 +48,24 @@ export const load = (async ({ locals, fetch, url: { pathname, searchParams } }) 
         };
     }
 
-    const users = (await response.json()) as User[];
-    const totalPages = Math.ceil(users[0].records / (params.limit));
+    const medications = (await response.json()) as Medication[];
+    const totalPages = Math.ceil(medications[0].records / (params.limit));
+
+    const responsePharmaceuticForm = await fetch(`${FARM_API}/medication/presentation`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json"
+        }
+    });
+
+    if (responsePharmaceuticForm.status === 200) {
+        pharmaceuticalForm = (await responsePharmaceuticForm.json()) as  PharmaceuticalForm[];
+    }
        
     return {
-        users: users,
-        records: users[0].records,
+        medications: medications,
+        pharmaceuticalForm,
+        records: medications[0].records,
         messageError: null, 
         params: params,
         pages: totalPages,

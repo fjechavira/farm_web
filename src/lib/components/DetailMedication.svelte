@@ -1,50 +1,48 @@
 <script lang="ts">
 	import { createEventDispatcher } from "svelte";
     // Models and Types
-    import type { UpdateUser, User } from "$lib/index";
+    import type { Medication, PharmaceuticalForm, UpdateMedication } from "$lib/index";
 
     export let isOpen: boolean = false;
     export let title: string = "";
     export let urlApi: string = "";
-    export let user: User;
+    export let medication: Medication;
+    export let pharmaceuticalForm: PharmaceuticalForm[] = [];
 
 
     let submit:boolean = false;
     const dispatch = createEventDispatcher();
-    const profiles: number[] = [1,2,3];
-    $:active = user && user.estatus === 1 ? true : false;
+    $:active = medication && medication.bhabilitado === 1 ? true : false;
 
     function onClose(message: string) {
         isOpen = !isOpen;
         submit = false;
 
         const detail = {isOpen, message};
-        dispatch("eventSlideDetailUser", detail);
+        dispatch("eventSlideDetailMedication", detail);
     }
 
     async function onSubmit() {
         submit = true;
 
-        if (!user.nombre || !user.password || !user.idPerfil || user.idPerfil === 0) {
-            console.log(`No cumplio valida 1`);
+        if (!medication.nombre || !medication.concentracion || !medication.idFormaFarmaceutica || medication.precio === 0 || !medication.stock || !medication.presentacion) {
+            console.log(`No cumplio valida Medicamento`);
             return;
         }
 
-        if (!validatePassword(user.password)) {
-            console.log(`No cumplio valida 2`);
-            return;
-        }
-
-        const payload: UpdateUser = {
-            nombre: user.nombre,
-            password: user.password,
-            idPerfil: user.idPerfil,
-            estatus: active ? 1 : 0,
+        const payload: UpdateMedication = {
+            nombre: medication.nombre,
+            concentracion: medication.concentracion,
+            idFormaFarmaceutica: medication.idFormaFarmaceutica,
+            precio: medication.precio,
+            stock: medication.stock,
+            presentacion: medication.presentacion,
+            bhabilitado: active ? 1 : 0
         };
 
-        console.log(`Body Request UpdateUser - ${JSON.stringify(payload)}`);
+        console.log(`Body Request UpdateMedication - ${JSON.stringify(payload)}`);
 
-        const response = await fetch(`${urlApi}/user/${user.idUsuario}`, {
+        const response = await fetch(`${urlApi}/medication/${medication.idMedicamento}`, {
 			method: 'PUT',
 			headers: {
 				'Content-Type': 'application/json'
@@ -59,12 +57,6 @@
         };
 
         onClose(response.status !== 200 ? messagesError[response.status] : "");
-    }
-
-    function validatePassword(password: string): boolean {
-        const regex = /^(?=.*\d)(?=.*[$@$!%*?&*-/.])(?=.*[A-Z])(?=.*[a-z])\S{8,16}$/;
-
-        return regex.test(password);
     }
 
 </script>
@@ -122,65 +114,81 @@
                         </div>
                         <div class="relative flex-1 px-4 sm:px-6">
                             <!-- Your content -->
-                            {#if user}
+                            {#if medication}
                                 <div>
                                     <div class="mt-2 flex rounded-md shadow-sm">
-                                    <span class="inline-flex items-center rounded-l-md border border-r-0 border-gray-300 px-3 text-gray-500 sm:text-sm">Id Usuario</span>
+                                    <span class="inline-flex items-center rounded-l-md border border-r-0 border-gray-300 px-3 text-gray-500 sm:text-sm">Id</span>
                                     <input 
                                         type="text" 
-                                        name="username" 
-                                        id="username" 
-                                        bind:value={user.usuario} 
+                                        name="medicationId" 
+                                        id="medicationId" 
+                                        bind:value={medication.idMedicamento} 
                                         disabled={true}
                                         class="block w-full min-w-0 flex-1 rounded-none rounded-r-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-emerald-500 sm:text-sm sm:leading-6 disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200">
                                     </div>
                                 </div>
                                 <div>
                                     <div class="mt-2 flex rounded-md shadow-sm">
-                                    <span class="inline-flex items-center rounded-l-md border border-r-0 border-gray-300 px-3 text-gray-500 sm:text-sm">Password</span>
-                                    <input 
-                                        type="password" 
-                                        name="password" 
-                                        id="password" 
-                                        bind:value={user.password} 
-                                        class={(!user.password || !validatePassword(user.password) ) && submit
-                                            ? "block w-full min-w-0 flex-1 rounded-none rounded-r-md border-0 py-1.5 text-red-900 ring-1 ring-inset ring-red-300 placeholder:text-red-400 focus:ring-2 focus:ring-inset focus:ring-red-500 sm:text-sm sm:leading-6"
-                                            : "block w-full min-w-0 flex-1 rounded-none rounded-r-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-emerald-500 sm:text-sm sm:leading-6"
-                                        }
-                                        placeholder="Contraseña de Usuario">
-                                    </div>
-                                </div>                    
-                                <div>
-                                    <div class="mt-2 flex rounded-md shadow-sm">
-                                    <span class="inline-flex items-center rounded-l-md border border-r-0 border-gray-300 px-3 text-gray-500 sm:text-sm">Nombre(s)</span>
+                                    <span class="inline-flex items-center rounded-l-md border border-r-0 border-gray-300 px-3 text-gray-500 sm:text-sm">Nombre</span>
                                     <input 
                                         type="text" 
-                                        name="first_name" 
-                                        id="first_name" 
-                                        bind:value={user.nombre} 
-                                        class={!user.nombre && submit
+                                        name="medicationName" 
+                                        id="medicationName" 
+                                        bind:value={medication.nombre} 
+                                        class={!medication.nombre && submit
                                             ? "block w-full min-w-0 flex-1 rounded-none rounded-r-md border-0 py-1.5 text-red-900 ring-1 ring-inset ring-red-300 placeholder:text-red-400 focus:ring-2 focus:ring-inset focus:ring-red-500 sm:text-sm sm:leading-6"
                                             : "block w-full min-w-0 flex-1 rounded-none rounded-r-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-emerald-500 sm:text-sm sm:leading-6"
                                         }
-                                        placeholder="Nombre Usuario">
+                                        placeholder="Nombre Medicamento">
                                     </div>
                                 </div>
                                 <div>
                                     <div class="mt-2 flex rounded-md shadow-sm">
-                                        <span class="inline-flex items-center rounded-l-md border border-r-0 border-gray-300 px-3 text-gray-500 sm:text-sm">Perfil</span>
+                                    <span class="inline-flex items-center rounded-l-md border border-r-0 border-gray-300 px-3 text-gray-500 sm:text-sm">Concentración</span>
+                                    <input 
+                                        type="text" 
+                                        name="concentration" 
+                                        id="concentration" 
+                                        bind:value={medication.concentracion} 
+                                        class={!medication.concentracion && submit
+                                            ? "block w-full min-w-0 flex-1 rounded-none rounded-r-md border-0 py-1.5 text-red-900 ring-1 ring-inset ring-red-300 placeholder:text-red-400 focus:ring-2 focus:ring-inset focus:ring-red-500 sm:text-sm sm:leading-6"
+                                            : "block w-full min-w-0 flex-1 rounded-none rounded-r-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-emerald-500 sm:text-sm sm:leading-6"
+                                        }
+                                        placeholder="Concentración de Medicamento">
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="mt-2 flex rounded-md shadow-sm">
+                                        <span class="inline-flex items-center rounded-l-md border border-r-0 border-gray-300 px-3 text-gray-500 sm:text-sm">Forma Farmaceutica</span>
                                         <select 
-                                            bind:value={user.idPerfil}
-                                            name="user_profile"
-                                            class={!user.idPerfil && submit
+                                            bind:value={medication.idFormaFarmaceutica}
+                                            name="customer_neighborhood"
+                                            class={!medication.idFormaFarmaceutica && submit
                                                 ? "block w-full min-w-0 flex-1 rounded-none rounded-r-md border-0 py-1.5 text-red-900 ring-1 ring-inset ring-red-300 placeholder:text-red-400 focus:ring-2 focus:ring-inset focus:ring-red-500 sm:text-sm sm:leading-6"
                                                 : "block w-full min-w-0 flex-1 rounded-none rounded-r-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-emerald-500 sm:text-sm sm:leading-6"
                                             }>
-                                            {#each profiles as p}
-                                                <option value="{p}">{p}</option>
+                                            {#each pharmaceuticalForm as p}
+                                                <option value="{p.idFormaFarmaceutica}">{p.nombre}</option>
                                             {/each}
                                         </select>
                                     </div>
                                 </div>
+                                <div>
+                                    <div class="mt-2 flex rounded-md shadow-sm">
+                                      <span class="inline-flex items-center rounded-l-md border border-r-0 border-gray-300 px-3 text-gray-500 sm:text-sm">Precio</span>
+                                      <input 
+                                        type="text" 
+                                        name="price" 
+                                        id="price" 
+                                        bind:value={medication.precio}
+                                        class={!medication.precio && submit
+                                            ? "block w-full min-w-0 flex-1 rounded-none rounded-r-md border-0 py-1.5 text-red-900 ring-1 ring-inset ring-red-300 placeholder:text-red-400 focus:ring-2 focus:ring-inset focus:ring-red-500 sm:text-sm sm:leading-6"
+                                            : "block w-full min-w-0 flex-1 rounded-none rounded-r-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-emerald-500 sm:text-sm sm:leading-6"
+                                        }
+                                        autocomplete="off"
+                                        placeholder="Precio Producto">
+                                    </div>
+                                </div>                               
                                 <div>
                                     <div class="mt-2">
                                         <div class="flex items-center justify-between">
