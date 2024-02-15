@@ -43,10 +43,14 @@
     }
 
     async function getUsers() {
-      const response = await fetch(`${data.urlApi}/user`, {
+      params.limit = 2;
+      params.offset = 1;
+      const dataParams = new URLSearchParams(params);
+      const uri = `${data.urlApi}/user?${dataParams.toString()}`;
+
+      const response = await fetch(uri, {
         method: 'GET',
-        headers: {
-            
+        headers: {            
           'Content-Type': 'application/json'
         }
       });
@@ -66,7 +70,7 @@
 
       data.records = users[0].records;
       data.users = users;   
-      data.pages = totalPages;   
+      data.pages = totalPages; 
     }
 
     async function getUserById(id: number) {
@@ -90,6 +94,28 @@
 
       selectedUser = (await response.json()) as User;
       openSlideDetailUser = !openSlideDetailUser;
+    }
+
+    async function deleteUserById(id: number) {
+      const response = await fetch(`${data.urlApi}/user/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.status !== 200) {
+        const messagesError: { [key: number]: string } = {
+            204: "No se encontraron datos",
+            400: "El servidor no pudo procesar la solicitud. Debido a que la sintaxis de la solicitud es incorrecta",
+            404: "El servidor no puede encontrar el recurso solicitado",
+            500: "Ocurrio un error en el servidor que impidió procesar la solicitud, intentarlo nuevamente, si el error persiste reportar con el Administrador",
+        };
+        alert(messagesError[response.status]);
+        return;
+      }
+
+      await getUsers();      
     }
 
 </script>
@@ -135,6 +161,7 @@
                         <td class="px-3 py-2 text-sm text-gray-500">{usr.idPerfil}</td>
                         <td class="py-2 pl-3 pr-4 text-right text-sm font-medium sm:pr-0">
                             <!-- <a href="#" class="text-indigo-600 hover:text-indigo-900">Edit<span class="sr-only">, Lindsay Walton</span></a> -->
+                            <button type="button" on:click={() => deleteUserById(usr.idUsuario)} class="rounded bg-red-600 px-2 py-1 text-xs font-semibold text-white shadow-sm hover:bg-red-700">Eliminar</button>
                             <button type="button" on:click={() => getUserById(usr.idUsuario)} class="rounded bg-gray-600 px-2 py-1 text-xs font-semibold text-white shadow-sm hover:bg-gray-700">Detalle</button>
                         </td>
                     </tr>

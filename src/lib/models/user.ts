@@ -15,3 +15,10 @@ export interface AddUser {
     password: string | null;
     idPerfil: number | null;
 }
+
+export interface UpdateUser {
+    nombre: string;
+    password: string;
+    idPerfil: number;
+    estatus: number;
+}

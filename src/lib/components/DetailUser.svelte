@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher } from "svelte";
     // Models and Types
-    import type { User } from "$lib/index";
+    import type { UpdateUser, User } from "$lib/index";
 
     export let isOpen: boolean = false;
     export let title: string = "";
@@ -22,10 +22,49 @@
         dispatch("eventSlideDetailUser", detail);
     }
 
-    function onSubmit() {
+    async function onSubmit() {
         submit = true;
 
-        return;
+        if (!user.nombre || !user.password || !user.idPerfil || user.idPerfil === 0 || !user.estatus) {
+            console.log(`No cumplio valida 1`);
+            return;
+        }
+
+        if (!validatePassword(user.password)) {
+            console.log(`No cumplio valida 2`);
+            return;
+        }
+
+        const payload: UpdateUser = {
+            nombre: user.nombre,
+            password: user.password,
+            idPerfil: user.idPerfil,
+            estatus: active ? 1 : 0,
+        };
+
+        console.log(`Body Request UpdateUser - ${JSON.stringify(payload)}`);
+
+        const response = await fetch(`${urlApi}/user/${user.idUsuario}`, {
+			method: 'PUT',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(payload)
+		});
+
+        const messagesError: { [key: number]: string } = {
+            400: "El servidor no pudo procesar la solicitud. Debido a que la sintaxis de la solicitud es incorrecta",
+            404: "El servidor no puede encontrar el recurso solicitado",
+            500: "Ocurrio un error en el servidor que impidió procesar la solicitud, intentarlo nuevamente, si el error persiste reportar con el Administrador",
+        };
+
+        onClose(response.status !== 200 ? messagesError[response.status] : "");
+    }
+
+    function validatePassword(password: string): boolean {
+        const regex = /^(?=.*\d)(?=.*[$@$!%*?&*-/.])(?=.*[A-Z])(?=.*[a-z])\S{8,16}$/;
+
+        return regex.test(password);
     }
 
 </script>
@@ -104,7 +143,10 @@
                                         name="password" 
                                         id="password" 
                                         bind:value={user.password} 
-                                        class="block w-full min-w-0 flex-1 rounded-none rounded-r-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-emerald-500 sm:text-sm sm:leading-6"
+                                        class={(!user.password || !validatePassword(user.password) ) && submit
+                                            ? "block w-full min-w-0 flex-1 rounded-none rounded-r-md border-0 py-1.5 text-red-900 ring-1 ring-inset ring-red-300 placeholder:text-red-400 focus:ring-2 focus:ring-inset focus:ring-red-500 sm:text-sm sm:leading-6"
+                                            : "block w-full min-w-0 flex-1 rounded-none rounded-r-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-emerald-500 sm:text-sm sm:leading-6"
+                                        }
                                         placeholder="Contraseña de Usuario">
                                     </div>
                                 </div>                    
