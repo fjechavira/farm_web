@@ -2,7 +2,7 @@
 	import { enhance } from '$app/forms';
 	import { onMount } from 'svelte';
 	// Types and Models
-	import type { ActionData } from '/$types';
+	import type { ActionData } from './$types';
 	import type { SignIn } from '$lib/index';
 
 	export let form: ActionData;
@@ -85,16 +85,6 @@
               class={form && !isValidPassword 
                 ? 'block w-full rounded-md border-0 py-1.5 text-red-900 shadow-sm ring-1 ring-inset ring-red-300 placeholder:text-red-300 focus:ring-2 focus:ring-inset focus:ring-red-500 sm:text-sm sm:leading-6' 
                 : 'block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-emerald-600 sm:text-sm sm:leading-6' }>
-          </div>
-        </div>
-        <div class="flex items-center justify-between">
-          <div class="flex items-center">
-            <input id="remember-me" name="remember-me" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-600">
-            <label for="remember-me" class="ml-3 block text-sm leading-6 text-gray-900">Recordarme</label>
-          </div>
-  
-          <div class="text-sm leading-6">
-            <a href="#" class="font-semibold text-emerald-600 hover:text-emerald-500">Olvide mi contraseña?</a>
           </div>
         </div>
         <div>

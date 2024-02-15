@@ -16,14 +16,12 @@ export const actions = {
 			return fail(400, { messagePassword: '*Requerido*' });
 		}
 
-		const url = `${FARM_API}/auth/login`;
-
 		const payload: SignIn = {
 			username,
 			password
 		};
 
-		const response = await fetch(url, {
+		const response = await fetch(`${FARM_API}/auth/login`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'
@@ -42,12 +40,13 @@ export const actions = {
 			return fail(400, { messageValidation: messagesError[response.status] });
 		}
 
-		const user: User = { id: 100, name: "Emanuel", username: "echavira", status: 1 };
+		const user: User = (await response.json()) as User;
 
 		const date = new Date();
 		date.setTime(date.getTime() + (1*24*60*60*1000));
+		console.log(`Expiration token - ${date}`);
 
-		cookies.set('session', user.username, {
+		cookies.set('session', user.usuario, {
 			path: '/',
 			httpOnly: true,
 			sameSite: "strict",
